@@ -15,42 +15,49 @@ df["Tempo de Treinamento (s)"] = pd.to_numeric(
 df["Épocas"] = pd.to_numeric(df["Épocas"], errors='coerce')
 df["Tamanho do Embedding"] = pd.to_numeric(df["Tamanho do Embedding"], errors='coerce')
 
-# Gráfico 1: Precisão Top-10 por Épocas, separado por Tamanho do Embedding
-plt.figure(figsize=(9, 6))
-for emb, grupo in df.groupby("Tamanho do Embedding"):
-    plt.plot(grupo["Épocas"], grupo["Precisão Top-10"], marker='o', label=f"Embedding {emb}")
+# Métricas a iterar
+tops = {
+    "Precisão Top-10": "Top-10",
+    "Precisão Top-50": "Top-50",
+    "Precisão Top-100": "Top-100"
+}
 
-plt.title("Precisão Top-10 por Número de Épocas (por Tamanho de Embedding)")
-plt.xlabel("Épocas")
-plt.ylabel("Precisão Top-10")
-plt.legend(title="Tamanho do Embedding")
-plt.grid(True)
-plt.tight_layout()
-plt.show()
+# 1. Precisão Top-x por Épocas (por Tamanho do Embedding)
+for col, label in tops.items():
+    plt.figure(figsize=(9, 6))
+    for emb, grupo in df.groupby("Tamanho do Embedding"):
+        plt.plot(grupo["Épocas"], grupo[col], marker='o', label=f"Embedding {emb}")
+    plt.title(f"{label} por Número de Épocas (por Tamanho de Embedding)")
+    plt.xlabel("Épocas")
+    plt.ylabel(label)
+    plt.legend(title="Tamanho do Embedding")
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
 
-# Gráfico 2: Precisão Top-100 vs Tempo de Treinamento por Tamanho do Embedding
-plt.figure(figsize=(9, 6))
-for emb, grupo in df.groupby("Tamanho do Embedding"):
-    plt.plot(grupo["Tempo de Treinamento (s)"], grupo["Precisão Top-100"], marker='s', label=f"Embedding {emb}")
+# 2. Precisão Top-x vs Tempo de Treinamento (por Tamanho do Embedding)
+for col, label in tops.items():
+    plt.figure(figsize=(9, 6))
+    for emb, grupo in df.groupby("Tamanho do Embedding"):
+        plt.plot(grupo["Tempo de Treinamento (s)"], grupo[col], marker='s', label=f"Embedding {emb}")
+    plt.title(f"{label} vs Tempo de Treinamento (por Tamanho de Embedding)")
+    plt.xlabel("Tempo de Treinamento (s)")
+    plt.ylabel(label)
+    plt.legend(title="Tamanho do Embedding")
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
 
-plt.title("Precisão Top-100 vs Tempo de Treinamento (por Tamanho de Embedding)")
-plt.xlabel("Tempo de Treinamento (s)")
-plt.ylabel("Precisão Top-100")
-plt.legend(title="Tamanho do Embedding")
-plt.grid(True)
-plt.tight_layout()
-plt.show()
-
-# Gráfico 3: Precisão Top-50 por Épocas e Otimizador, colorido por Tamanho do Embedding
-plt.figure(figsize=(9, 6))
-for (opt, emb), grupo in df.groupby(["Otimizador", "Tamanho do Embedding"]):
-    label = f"{opt} - Embedding {emb}"
-    plt.plot(grupo["Épocas"], grupo["Precisão Top-50"], marker='D', label=label)
-
-plt.title("Precisão Top-50 por Épocas (Otimizador + Embedding)")
-plt.xlabel("Épocas")
-plt.ylabel("Precisão Top-50")
-plt.legend(title="Configuração")
-plt.grid(True)
-plt.tight_layout()
-plt.show()
+# 3. Precisão Top-x por Épocas e Otimizador (colorido por Tamanho do Embedding)
+for col, label in tops.items():
+    plt.figure(figsize=(9, 6))
+    for (opt, emb), grupo in df.groupby(["Otimizador", "Tamanho do Embedding"]):
+        linha = f"{opt} - Embedding {emb}"
+        plt.plot(grupo["Épocas"], grupo[col], marker='D', label=linha)
+    plt.title(f"{label} por Épocas (Otimizador + Embedding)")
+    plt.xlabel("Épocas")
+    plt.ylabel(label)
+    plt.legend(title="Configuração")
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
